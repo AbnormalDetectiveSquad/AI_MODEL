@@ -1,14 +1,11 @@
 import logging
-import gc
 import argparse
 import warnings
 import numpy as np
 import pandas as pd
 from sklearn import preprocessing
 import torch
-import csv
-from script import utility
-from model import models
+from model import models, utility
 import scipy.sparse as sp
 def get_parameters():
     parser = argparse.ArgumentParser(description='STGCN')
@@ -76,13 +73,13 @@ def Sort_and_shaping(inputd,idsort,weakdayinform=1):
 def calculattion_data(input,weakday):        
     
     args, device, blocks = get_parameters()
-    ID_sort=pd.read_csv('ID_sort.csv') 
+    ID_sort=pd.read_csv('./model/ID_sort.csv') 
     x=Sort_and_shaping(InPut,ID_sort)                                 
     zscore = preprocessing.StandardScaler()                           
     x[0,:,:] = zscore.fit_transform(x[0,:,:])
     x=torch.tensor(x).unsqueeze(0)
 
-    dense_matrix=sp.load_npz('adj_matrix.npz')
+    dense_matrix=sp.load_npz('./model/adj_matrix.npz')
     adj = sp.csc_matrix(dense_matrix)
     n_vertex = adj.shape[0]
     gso = utility.calc_gso(adj, args.gso_type)
@@ -93,7 +90,7 @@ def calculattion_data(input,weakday):
     args.gso = torch.from_numpy(gso)
     with torch.no_grad():
         model = models.STGCNChebGraphConv_OSA(args, blocks, n_vertex)
-        model.load_state_dict(torch.load("gangnamgu_with_weakday.pt"))
+        model.load_state_dict(torch.load("./model/gangnamgu_with_weakday.pt"))
         model.eval()
         y = model(x).squeeze(1).numpy()[0,:,:]
     
@@ -110,7 +107,7 @@ if __name__ == "__main__":
     warnings.filterwarnings("ignore", category=FutureWarning)
     warnings.filterwarnings("ignore", category=UserWarning)
     
-    InPut=pd.read_csv('Sample.csv')# 입력 데이터 샘플 입니다. 시간순으로 column이 0부터 23 까지 되어있고 Link_ID 
+    InPut=pd.read_csv('./model/Sample.csv')# 입력 데이터 샘플 입니다. 시간순으로 column이 0부터 23 까지 되어있고 Link_ID 
                                  #column에 서울시 강남구의 Link_ID가 들어가 있어야 합니다. 순서는 자동 정렬 됩니다.
     weakday=1 #월요일=0 금요일=0.5 토,일=1, 나머지 요일=0.1
 

@@ -3,8 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.nn.init as init
-from torch_geometric.nn import ChebConv
-class Align(nn.Module):
+class Align(nn.Module):                 #필요
     def __init__(self, c_in, c_out):
         super(Align, self).__init__()
         self.c_in = c_in
@@ -21,23 +20,7 @@ class Align(nn.Module):
             x = x
         
         return x
-
-class CausalConv1d(nn.Conv1d):
-    def __init__(self, in_channels, out_channels, kernel_size, stride=1, enable_padding=False, dilation=1, groups=1, bias=True):
-        if enable_padding == True:
-            self.__padding = (kernel_size - 1) * dilation
-        else:
-            self.__padding = 0
-        super(CausalConv1d, self).__init__(in_channels, out_channels, kernel_size=kernel_size, stride=stride, padding=self.__padding, dilation=dilation, groups=groups, bias=bias)
-
-    def forward(self, input):
-        result = super(CausalConv1d, self).forward(input)
-        if self.__padding != 0:
-            return result[: , : , : -self.__padding]
-        
-        return result
-
-class CausalConv2d(nn.Conv2d):
+class CausalConv2d(nn.Conv2d):              #필요
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, enable_padding=False, dilation=1, groups=1, bias=True):
         kernel_size = nn.modules.utils._pair(kernel_size)
         stride = nn.modules.utils._pair(stride)
@@ -56,7 +39,7 @@ class CausalConv2d(nn.Conv2d):
 
         return result
 
-class TemporalConvLayer(nn.Module):
+class TemporalConvLayer(nn.Module):     #필요
 
     # Temporal Convolution Layer (GLU)
     #
@@ -119,7 +102,7 @@ class TemporalConvLayer(nn.Module):
         
         return x
 
-class ChebGraphConv(nn.Module):
+class ChebGraphConv(nn.Module):                                     #필요
     def __init__(self, c_in, c_out, Ks, gso, bias):
         super(ChebGraphConv, self).__init__()
         self.c_in = c_in
@@ -171,7 +154,7 @@ class ChebGraphConv(nn.Module):
         
         return cheb_graph_conv
 
-class GraphConv(nn.Module):
+class GraphConv(nn.Module):                             #필요
     def __init__(self, c_in, c_out, gso, bias):
         super(GraphConv, self).__init__()
         self.c_in = c_in
@@ -205,7 +188,7 @@ class GraphConv(nn.Module):
         
         return graph_conv
 
-class GraphConvLayer(nn.Module):
+class GraphConvLayer(nn.Module):                     #필요
     def __init__(self, graph_conv_type, c_in, c_out, Ks, gso, bias):
         super(GraphConvLayer, self).__init__()
         self.graph_conv_type = graph_conv_type
@@ -230,7 +213,7 @@ class GraphConvLayer(nn.Module):
 
         return x_gc_out
 
-class STConvBlock(nn.Module):
+class STConvBlock(nn.Module):                               #필요
     # STConv Block contains 'TGTND' structure
     # T: Gated Temporal Convolution Layer (GLU or GTU)
     # G: Graph Convolution Layer (ChebGraphConv or GraphConv)
@@ -257,32 +240,7 @@ class STConvBlock(nn.Module):
 
         return x
 
-class OutputBlock(nn.Module):
-    # Output block contains 'TNFF' structure
-    # T: Gated Temporal Convolution Layer (GLU or GTU)
-    # N: Layer Normolization
-    # F: Fully-Connected Layer
-    # F: Fully-Connected Layer
-
-    def __init__(self, Ko, last_block_channel, channels, end_channel, n_vertex, act_func, bias, droprate):
-        super(OutputBlock, self).__init__()
-        self.tmp_conv1 = TemporalConvLayer(Ko, last_block_channel, channels[0], n_vertex, act_func)
-        self.fc1 = nn.Linear(in_features=channels[0], out_features=channels[1], bias=bias)
-        self.fc2 = nn.Linear(in_features=channels[1], out_features=end_channel, bias=bias)
-        self.tc1_ln = nn.LayerNorm([n_vertex, channels[0]], eps=1e-12)
-        self.relu = nn.ReLU()
-        self.dropout = nn.Dropout(p=droprate)
-
-    def forward(self, x):
-        x = self.tmp_conv1(x)
-        x = self.tc1_ln(x.permute(0, 2, 3, 1))
-        x = self.fc1(x)
-        x = self.relu(x)
-        x = self.dropout(x)
-        x = self.fc2(x).permute(0, 3, 1, 2)
-
-        return x
-class OutputBlock_OSA(nn.Module):
+class OutputBlock_OSA(nn.Module):                   #필요
     # Output block contains 'TNFF' structure
     # T: Gated Temporal Convolution Layer (GLU or GTU)
     # N: Layer Normolization
