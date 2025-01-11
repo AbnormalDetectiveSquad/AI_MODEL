@@ -4,9 +4,7 @@ import pandas as pd
 import scipy.sparse as sp
 import torch
 import geopandas as gpd
-import matplotlib
-matplotlib.use('TkAgg')  # Tk 백엔드 사용
-import matplotlib.pyplot as plt
+
 
 
 def analyze_distance_distribution(distances, n_bins=40):

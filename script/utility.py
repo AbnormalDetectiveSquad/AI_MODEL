@@ -25,7 +25,8 @@ def calc_gso(dir_adj, gso_type):
     if gso_type == 'sym_norm_adj' or gso_type == 'sym_renorm_adj' \
         or gso_type == 'sym_norm_lap' or gso_type == 'sym_renorm_lap':
         row_sum = adj.sum(axis=1).A1
-        row_sum_inv_sqrt = np.power(row_sum, -0.5)
+        with np.errstate(divide='ignore', invalid='ignore'):
+            row_sum_inv_sqrt = np.power(row_sum, -0.5)
         row_sum_inv_sqrt[np.isinf(row_sum_inv_sqrt)] = 0.
         deg_inv_sqrt = sp.diags(row_sum_inv_sqrt, format='csc')
         # A_{sym} = D^{-0.5} * A * D^{-0.5}
